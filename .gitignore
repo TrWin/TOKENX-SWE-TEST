@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Smart Contracts (Hardhat)
+cache/
+artifacts/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
