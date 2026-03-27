@@ -21,3 +21,12 @@ npm-debug.log*
 # Testing
 coverage/
 .nyc_output/
+
+# Database
+backend/src/db/redemptions.db
+
+# Deploy output (local addresses เปลี่ยนทุก deploy)
+deployment.json
+
+# Frontend build
+frontend/dist/
