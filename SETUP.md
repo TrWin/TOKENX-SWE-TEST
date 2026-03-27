@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- Node.js v18+
-- npm v9+
+- Node.js v20.X
+- npm v10.X 
 - MetaMask browser extension
 
 ---
