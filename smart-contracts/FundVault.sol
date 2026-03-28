@@ -3,6 +3,8 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title FundVault
@@ -22,12 +24,11 @@ interface IVaultShares {
     function totalSupply() external view returns (uint256);
 }
 
-contract FundVault {
+contract FundVault is Ownable, Pausable {
     using SafeERC20 for IERC20;
 
     error Unauthorized();
     error InsufficientLiquidity();
-    error Paused();
 
     event Withdrawal(address indexed to, uint256 amount);
     event Payout(address indexed to, uint256 amount);
@@ -38,44 +39,28 @@ contract FundVault {
     address public vaultShares;
     uint256 public investedAmount;
 
-    address private _admin;
-    bool private _paused;
-
-    // ─── Modifiers ────────────────────────────────────────────────────────────
-
-    modifier onlyAdmin() {
-        if (msg.sender != _admin) revert Unauthorized();
-        _;
-    }
-
     modifier onlyVaultShares() {
         if (msg.sender != vaultShares) revert Unauthorized();
         _;
     }
 
-    modifier whenNotPaused() {
-        if (_paused) revert Paused();
-        _;
-    }
-
-    constructor(address _stablecoin) {
+    constructor(address _stablecoin) Ownable(msg.sender) {
         // TODO: Initialize contract state
         stablecoin = IERC20(_stablecoin);
-        _admin = msg.sender;
-        _paused = false;
     }
 
     /// @notice Sets the authorized VaultShares address.
     /// @dev Only callable by Admin.
-    function setVaultShares(address _vaultShares) external onlyAdmin {
+    function setVaultShares(address _vaultShares) external onlyOwner {
         // TODO: Implementation
         vaultShares = _vaultShares;
     }
 
     /// @notice Withdraws stablecoins from the vault for fund deployment.
     /// @dev Access control and pause-state validation required.
-    function withdraw(uint256 _amount) external onlyAdmin whenNotPaused {
+    function withdraw(uint256 _amount) external onlyOwner whenNotPaused {
         // TODO: Implementation
+        require(_amount > 0, "Zero amount");
         if (stablecoin.balanceOf(address(this)) < _amount) revert InsufficientLiquidity();
 
         investedAmount += _amount;
@@ -96,15 +81,15 @@ contract FundVault {
     }
 
     /// @notice (Admin Only) Pauses all contract interactions.
-    function pause() external onlyAdmin {
+    function pause() external onlyOwner {
         // TODO: Implementation
-        _paused = true;
+        _pause();
     }
 
     /// @notice (Admin Only) Unpauses the contract.
-    function unpause() external onlyAdmin {
+    function unpause() external onlyOwner {
         // TODO: Implementation
-        _paused = false;
+        _unpause();
     }
 
     /// @notice Returns the total amount of stablecoins held in this contract.
@@ -117,9 +102,15 @@ contract FundVault {
     /// @dev Calculation must account for both actual balance and deployed investments.
     function aum() external view returns (uint256) {
         // TODO: Implementation
-        // AUM = totalShares × NAV (price per share)
-        // ครอบคลุมทั้ง liquidity ใน vault และเงินที่ถอนออกไปลงทุน off-chain แล้ว
+        if (vaultShares == address(0)) {
+            // รวม balance ที่ยังอยู่ + เงินที่ถอนออกไปลงทุน
+            return stablecoin.balanceOf(address(this)) + investedAmount;
+        }
         IVaultShares vs = IVaultShares(vaultShares);
-        return (vs.totalSupply() * vs.nav()) / 1e18;
+        uint256 supply = vs.totalSupply();
+        if (supply == 0) {
+            return stablecoin.balanceOf(address(this)) + investedAmount;
+        }
+        return (supply * vs.nav()) / 1e18;
     }
 }
