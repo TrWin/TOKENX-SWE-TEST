@@ -90,21 +90,7 @@ PORT=3000
 
 ---
 
-## 6. Configure Frontend
-
-แก้ไข `frontend/src/contracts/addresses.js` ใส่ address จากข้อ 4:
-
-```javascript
-export const ADDRESSES = {
-  THBMock:     "0x...",   // THBMock address
-  FundVault:   "0x...",   // FundVault address
-  VaultShares: "0x...",   // VaultShares address
-};
-```
-
----
-
-## 7. Start Backend
+## 6. Start Backend
 
 ```bash
 # Terminal 3
@@ -115,7 +101,7 @@ npm start
 
 ---
 
-## 8. Start Frontend
+## 7. Start Frontend
 
 ```bash
 # Terminal 4
@@ -126,7 +112,7 @@ npm run dev
 
 ---
 
-## 9. MetaMask Setup
+## 8. MetaMask Setup
 
 1. ติดตั้ง MetaMask extension ใน Chrome: https://metamask.io
 2. Import wallet ด้วย Secret Recovery Phrase:
@@ -145,7 +131,7 @@ npm run dev
 
 ---
 
-## 10. API Endpoints
+## 9. API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -178,7 +164,7 @@ curl -X POST http://localhost:3000/api/settle \
 
 ---
 
-## 11. Run Tests
+## 10. Run Tests
 
 ```bash
 # รันจาก root
